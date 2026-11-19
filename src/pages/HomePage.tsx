@@ -14,6 +14,7 @@ import {
 import TransactionRow from '../components/TransactionRow'
 import UpdateBanner from '../components/UpdateBanner'
 import { IconChevronLeft, IconChevronRight } from '../components/Icons'
+import { AppIcon } from '../lib/appIcons'
 import type { Transaction } from '../db/types'
 
 export default function HomePage({ navigate }: { navigate: (to: string) => void }) {
@@ -71,14 +72,14 @@ export default function HomePage({ navigate }: { navigate: (to: string) => void 
   const entries = [
     {
       key: 'add',
-      em: '✍️',
+      icon: 'notebook-pen',
       title: '记一笔',
       sub: '自己填金额分类',
       go: () => navigate('/add'),
     },
     {
       key: 'chat',
-      em: '💬',
+      icon: 'message-circle',
       title: '对话记账',
       sub: '说一句话就记上',
       go: () => navigate('/chat'),
@@ -86,10 +87,10 @@ export default function HomePage({ navigate }: { navigate: (to: string) => void 
   ]
 
   const shortcuts = [
-    { em: '🍜', label: '餐饮', go: () => navigate('/add?cat=c_food') },
-    { em: '🚇', label: '交通', go: () => navigate('/add?cat=c_transport') },
-    { em: '🛍️', label: '购物', go: () => navigate('/add?cat=c_shopping') },
-    { em: '📊', label: '预算', go: () => navigate('/budget') },
+    { icon: 'utensils', label: '餐饮', go: () => navigate('/add?cat=c_food') },
+    { icon: 'train-front', label: '交通', go: () => navigate('/add?cat=c_transport') },
+    { icon: 'shopping-bag', label: '购物', go: () => navigate('/add?cat=c_shopping') },
+    { icon: 'piggy-bank', label: '预算', go: () => navigate('/budget') },
   ]
 
   const shiftMonth = (delta: number) =>
@@ -201,9 +202,9 @@ export default function HomePage({ navigate }: { navigate: (to: string) => void 
             >
               <span
                 className="cat-icon"
-                style={{ background: a.color + '1f', width: 30, height: 30, fontSize: 15, borderRadius: 10 }}
+                style={{ background: a.color + '1f', width: 30, height: 30, borderRadius: 10 }}
               >
-                {a.icon}
+                <AppIcon name={a.icon} size={16} color={a.color} />
               </span>
               <span className="n">{a.name}</span>
               <span
@@ -221,7 +222,7 @@ export default function HomePage({ navigate }: { navigate: (to: string) => void 
         {entries.map((e) => (
           <button key={e.key} className={'entry entry-' + e.key} onClick={e.go}>
             <span className="em" aria-hidden>
-              {e.em}
+              <AppIcon name={e.icon} size={22} />
             </span>
             <span className="txt">
               <span className="t">{e.title}</span>
@@ -234,7 +235,9 @@ export default function HomePage({ navigate }: { navigate: (to: string) => void 
       <div className="shortcuts">
         {shortcuts.map((s) => (
           <button key={s.label} className="shortcut" onClick={s.go}>
-            <span className="em">{s.em}</span>
+            <span className="em">
+              <AppIcon name={s.icon} size={20} />
+            </span>
             {s.label}
           </button>
         ))}
@@ -249,7 +252,9 @@ export default function HomePage({ navigate }: { navigate: (to: string) => void 
         </div>
         {todayList.length === 0 ? (
           <div className="card empty">
-            <span className="em">☕️</span>
+            <span className="em">
+              <AppIcon name="coffee" size={30} />
+            </span>
             <div className="t">今天还没有记账</div>
             <div className="s">点右下角的 + 记一笔</div>
           </div>

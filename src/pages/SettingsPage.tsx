@@ -40,6 +40,7 @@ import {
   IconTrash,
   IconUpload,
 } from '../components/Icons'
+import { AppIcon } from '../lib/appIcons'
 
 export default function SettingsPage({
   back,
@@ -317,19 +318,19 @@ export default function SettingsPage({
         </div>
         <div className="card" style={{ overflow: 'hidden' }}>
           <button className="list-row" onClick={() => navigate('/categories')}>
-            <span>🏷️</span>
+            <AppIcon name="tags" size={18} color="var(--text-2)" />
             <span className="lbl">分类管理</span>
             <span className="val" style={{ fontFamily: 'var(--font-sans)' }}>{categories.length} 个</span>
             <IconChevronRight size={16} className="chev" />
           </button>
           <button className="list-row" onClick={() => navigate('/accounts')}>
-            <span>💳</span>
+            <AppIcon name="credit-card" size={18} color="var(--text-2)" />
             <span className="lbl">账户管理</span>
             <span className="val" style={{ fontFamily: 'var(--font-sans)' }}>{accounts.length} 个</span>
             <IconChevronRight size={16} className="chev" />
           </button>
           <button className="list-row" onClick={() => navigate('/recurring')}>
-            <span>🔁</span>
+            <AppIcon name="calendar-clock" size={18} color="var(--text-2)" />
             <span className="lbl">周期账单</span>
             <span className="val" style={{ fontFamily: 'var(--font-sans)' }}>{recurring.length} 条</span>
             <IconChevronRight size={16} className="chev" />

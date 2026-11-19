@@ -10,6 +10,7 @@ import {
   IconWallet,
   IconGear,
 } from '../components/Icons'
+import { AppIcon } from '../lib/appIcons'
 
 export default function MinePage({ navigate }: { navigate: (to: string) => void }) {
   const { transactions, accounts, accountBalances, categories, recurring } = useApp()
@@ -31,14 +32,14 @@ export default function MinePage({ navigate }: { navigate: (to: string) => void 
 
   const entries = [
     {
-      icon: '💬',
+      icon: <AppIcon name="message-circle" size={18} />,
       label: '对话记账',
       value: '一句话入账',
       to: '/chat',
       color: '#D97F35',
     },
     {
-      icon: '🗓️',
+      icon: <AppIcon name="calendar" size={18} />,
       label: '记账日历',
       value: '按月看每天',
       to: '/calendar',
@@ -66,7 +67,7 @@ export default function MinePage({ navigate }: { navigate: (to: string) => void 
       color: '#6E92C4',
     },
     {
-      icon: '🏷️',
+      icon: <AppIcon name="shapes" size={18} />,
       label: '分类管理',
       value: `${categories.length} 个`,
       to: '/categories',
@@ -100,10 +101,9 @@ export default function MinePage({ navigate }: { navigate: (to: string) => void 
             boxShadow: '0 8px 18px -10px rgba(208,144,44,.85)',
             display: 'grid',
             placeItems: 'center',
-            fontSize: 24,
           }}
         >
-          💰
+          <AppIcon name="piggy-bank" size={27} color="#3A2410" />
         </div>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 15, fontWeight: 600 }}>我的小金库</div>

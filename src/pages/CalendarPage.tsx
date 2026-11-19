@@ -5,6 +5,7 @@ import { formatMonth, money, weekdayLabel } from '../lib/format'
 import MonthCalendar from '../components/MonthCalendar'
 import TransactionRow from '../components/TransactionRow'
 import { IconChevronLeft, IconChevronRight } from '../components/Icons'
+import { AppIcon } from '../lib/appIcons'
 
 /**
  * 记账日历：一月一屏，每格写当天的支出/收入，点开看那天的明细。
@@ -89,7 +90,9 @@ export default function CalendarPage({ back }: { back: () => void }) {
           <div className="card">
             {pickedTx.length === 0 ? (
               <div className="empty" style={{ padding: '26px 16px' }}>
-                <span className="em">🗓</span>
+                <span className="em">
+                  <AppIcon name="calendar" size={30} />
+                </span>
                 <div className="t">这天没有记账</div>
               </div>
             ) : (
@@ -101,7 +104,9 @@ export default function CalendarPage({ back }: { back: () => void }) {
 
       {!picked && (
         <div className="card empty" style={{ marginTop: 14, padding: '22px 16px' }}>
-          <span className="em">🗓</span>
+          <span className="em">
+            <AppIcon name="calendar" size={30} />
+          </span>
           <div className="t">点某一天</div>
           <div className="s">看看那天记了几笔、花了多少</div>
         </div>

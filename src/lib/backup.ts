@@ -5,6 +5,7 @@
  * 保证三条路用的是同一份格式，不会出现「导出的能读、自动存的读不了」。
  */
 import { db } from '../db'
+import { migrateLegacyIcon } from '../db/iconKeys'
 import type { Account, Budget, Category, Recurring, Transaction } from '../db/types'
 
 export const BACKUP_APP = 'money-account'
@@ -46,13 +47,23 @@ export function parseBackup(text: string): Backup | null {
   try {
     const data = JSON.parse(text) as Partial<Backup>
     if (data?.app !== BACKUP_APP || !Array.isArray(data.transactions)) return null
+    // 旧账本里存的是 emoji 图标，读进来时顺手迁移成 Lucide key；
+    // 认不出来的（用户自定义 emoji）原样保留。
+    const accounts = (data.accounts ?? []).map((a) => ({
+      ...a,
+      icon: migrateLegacyIcon(a.id, a.icon),
+    }))
+    const categories = (data.categories ?? []).map((c) => ({
+      ...c,
+      icon: migrateLegacyIcon(c.id, c.icon),
+    }))
     return {
       app: BACKUP_APP,
       version: data.version ?? BACKUP_VERSION,
       exportedAt: data.exportedAt ?? new Date().toISOString(),
       transactions: data.transactions,
-      accounts: data.accounts ?? [],
-      categories: data.categories ?? [],
+      accounts,
+      categories,
       budgets: data.budgets ?? [],
       recurring: data.recurring ?? [],
     }

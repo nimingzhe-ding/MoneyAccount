@@ -637,6 +637,61 @@ textarea {
   background: var(--surface-3);
 }
 
+/* 明细页左滑删除 */
+.tx-swipe {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface);
+  touch-action: pan-y;
+}
+
+.tx-swipe .tx-row {
+  background: var(--surface);
+  will-change: transform;
+}
+
+.tx-swipe .tx-row:active {
+  background: var(--surface-3);
+}
+
+.tx-swipe + .tx-swipe .tx-row::before {
+  content: '';
+  position: absolute;
+  left: 57px;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: var(--line);
+}
+
+.tx-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 60px;
+  /* 底层跟整行同色，红色只做成一枚内嵌的圆角按钮，和左边内容衔接更自然 */
+  background: var(--surface);
+  padding: 5px 5px 5px 3px;
+}
+
+.tx-delete {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: var(--negative);
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  transition: transform 0.12s, background 0.12s;
+}
+
+.tx-delete:active {
+  transform: scale(0.94);
+  background: color-mix(in srgb, var(--negative) 88%, #000);
+}
+
 .cat-icon {
   width: 34px;
   height: 34px;
@@ -646,6 +701,34 @@ textarea {
   font-size: 17px;
   flex: none;
   line-height: 1;
+}
+
+/* 深色底上把线性图标提亮一点，避免分类色太暗看不清 */
+[data-theme='dark'] .cat-icon svg,
+[data-theme='dark'] .box svg,
+[data-theme='dark'] .ce-icon svg,
+[data-theme='dark'] .chat-avatar svg {
+  filter: brightness(1.12) saturate(1.05);
+}
+
+/* 分类编辑面板里的图标选择器 */
+.icon-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.icon-pick {
+  aspect-ratio: 1;
+  border-radius: 11px;
+  border: 1.5px solid transparent;
+  display: grid;
+  place-items: center;
+  transition: transform 0.14s, background 0.14s, border-color 0.14s;
+}
+
+.icon-pick:active {
+  transform: scale(0.9);
 }
 
 .tx-main {

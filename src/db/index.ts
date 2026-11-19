@@ -1,6 +1,7 @@
 import Dexie, { type Table } from 'dexie'
 import type { Account, Budget, Category, Recurring, Setting, Transaction } from './types'
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES, seedAccounts, seedCategories } from './seed'
+import { migrateLegacyIcon } from './iconKeys'
 
 // v1 用的那套高饱和色，v2 换成更柔和的暖色板。
 // 只改还停留在旧默认色的分类，用户自己调过的颜色不动。
@@ -81,6 +82,27 @@ class MoneyDB extends Dexie {
         }
         await recolor('categories')
         await recolor('accounts')
+      })
+
+    // v3：分类/账户图标从 emoji 换成 Lucide 的 key。
+    // 只替换「还是默认 emoji」的记录，用户自己改过的图标保留，渲染层会继续按 emoji 显示。
+    this.version(3)
+      .stores({
+        transactions: 'id, date, type, categoryId, accountId, createdAt',
+        accounts: 'id, order',
+        categories: 'id, type, order',
+        budgets: 'id, month',
+        recurring: 'id, enabled',
+        settings: 'key',
+      })
+      .upgrade(async (tx) => {
+        const migrateIcons = async (table: string) => {
+          await tx.table(table).toCollection().modify((row: { id: string; icon?: string }) => {
+            row.icon = migrateLegacyIcon(row.id, row.icon)
+          })
+        }
+        await migrateIcons('categories')
+        await migrateIcons('accounts')
       })
   }
 }

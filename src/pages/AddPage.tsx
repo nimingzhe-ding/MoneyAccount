@@ -12,6 +12,7 @@ import {
   IconTransfer,
   IconTrash,
 } from '../components/Icons'
+import { AppIcon } from '../lib/appIcons'
 import type { Category, Transaction, TxType } from '../db/types'
 
 type Mode = TxType
@@ -176,8 +177,8 @@ export default function AddPage({
 
   // 金额卡左侧：支出/收入跟着分类走，转账显示两端账户
   const pickedCat = catMap.get(categoryId)
-  const pickEmoji =
-    mode === 'transfer' ? '🔄' : (pickedCat?.icon ?? '❓')
+  const pickIcon =
+    mode === 'transfer' ? 'arrow-left-right' : (pickedCat?.icon ?? 'package')
   const pickColor =
     mode === 'transfer' ? '#9C86C9' : pickedCat?.color
   // 转账时这里只说「转账」，两端账户交给下面那张卡，免得同一句话写两遍
@@ -299,7 +300,7 @@ export default function AddPage({
             className="am-em"
             style={{ background: (pickColor ?? '#999') + '26' }}
           >
-            {pickEmoji}
+            <AppIcon name={pickIcon} size={22} color={pickColor} />
           </span>
           <span className="am-txt">
             <span className="am-name">{pickName}</span>
@@ -316,7 +317,9 @@ export default function AddPage({
 
       <div className="add-meta">
         <button className="chip strong" onClick={() => setSheet('account')}>
-          <span className="em">{acc?.icon ?? '💳'}</span>
+          <span className="em">
+            <AppIcon name={acc?.icon ?? 'credit-card'} size={15} color={acc?.color} />
+          </span>
           {acc?.name ?? '选择账户'}
         </button>
         {mode === 'transfer' && (
@@ -325,7 +328,9 @@ export default function AddPage({
               →
             </span>
             <button className="chip strong" onClick={() => setSheet('toAccount')}>
-              <span className="em">{toAcc?.icon ?? '💳'}</span>
+              <span className="em">
+                <AppIcon name={toAcc?.icon ?? 'credit-card'} size={15} color={toAcc?.color} />
+              </span>
               {toAcc?.name ?? '转入账户'}
             </button>
           </>
@@ -338,7 +343,9 @@ export default function AddPage({
         {/* 备注并进这一排：它和账户、日期一样都是「这笔的附属信息」，
             单独占一条横带会像中间夹了块板子 */}
         <label className={'note-chip' + (noteFocus ? ' on' : '') + (note ? ' has' : '')}>
-          <span className="note-em">📝</span>
+          <span className="note-em">
+            <AppIcon name="notebook-pen" size={14} />
+          </span>
           <input
             className="note-input"
             placeholder="备注"
@@ -382,7 +389,7 @@ export default function AddPage({
                 className="tf-em"
                 style={{ background: (acc?.color ?? '#999') + '26' }}
               >
-                {acc?.icon ?? '💳'}
+                <AppIcon name={acc?.icon ?? 'credit-card'} size={20} color={acc?.color} />
               </span>
               <span className="tf-name">{acc?.name ?? '转出账户'}</span>
               <span className="tf-bal">
@@ -412,7 +419,7 @@ export default function AddPage({
                 className="tf-em"
                 style={{ background: (toAcc?.color ?? '#999') + '26' }}
               >
-                {toAcc?.icon ?? '💳'}
+                <AppIcon name={toAcc?.icon ?? 'credit-card'} size={20} color={toAcc?.color} />
               </span>
               <span className="tf-name">{toAcc?.name ?? '转入账户'}</span>
               <span className="tf-bal">
@@ -440,7 +447,7 @@ export default function AddPage({
                     }}
                   >
                     <span className="cat-icon" style={{ background: from.color + '1f' }}>
-                      {from.icon}
+                      <AppIcon name={from.icon} size={17} color={from.color} />
                     </span>
                     <span className="tf-recent-name">
                       {from.name} → {to.name}
@@ -503,7 +510,7 @@ export default function AddPage({
                   }}
                 >
                   <span className="box" style={sel ? { background: c.color } : undefined}>
-                    {c.icon}
+                    <AppIcon name={c.icon} size={20} color={sel ? '#fff' : c.color} />
                   </span>
                   <span className="nm">{c.name}</span>
                 </button>
@@ -589,7 +596,9 @@ export default function AddPage({
                 onClick={() => { setAccountId(a.id); setSheet(null) }}
                 style={a.id === accountId ? { borderColor: 'var(--accent)', background: 'var(--accent-soft)' } : undefined}
               >
-                <span className="cat-icon" style={{ background: a.color + '1f' }}>{a.icon}</span>
+                <span className="cat-icon" style={{ background: a.color + '1f' }}>
+                  <AppIcon name={a.icon} size={17} color={a.color} />
+                </span>
                 <span style={{ flex: 1, textAlign: 'left' }}>
                   <span className="nm">{a.name}</span>
                 </span>
@@ -613,7 +622,9 @@ export default function AddPage({
                 onClick={() => { setToAccountId(a.id); setSheet(null) }}
                 style={a.id === toAccountId ? { borderColor: 'var(--accent)', background: 'var(--accent-soft)' } : undefined}
               >
-                <span className="cat-icon" style={{ background: a.color + '1f' }}>{a.icon}</span>
+                <span className="cat-icon" style={{ background: a.color + '1f' }}>
+                  <AppIcon name={a.icon} size={17} color={a.color} />
+                </span>
                 <span style={{ flex: 1, textAlign: 'left' }}>
                   <span className="nm">{a.name}</span>
                 </span>

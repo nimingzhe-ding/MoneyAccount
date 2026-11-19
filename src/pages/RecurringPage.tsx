@@ -5,6 +5,7 @@ import { useApp } from '../lib/store'
 import { money, uid } from '../lib/format'
 import Sheet from '../components/Sheet'
 import { IconChevronLeft, IconPlus, IconTrash, IconRepeat } from '../components/Icons'
+import { AppIcon } from '../lib/appIcons'
 import type { Recurring, RecurringFreq } from '../db/types'
 
 const FREQ_LABEL: Record<RecurringFreq, string> = {
@@ -38,7 +39,7 @@ export default function RecurringPage({ back }: { back: () => void }) {
       </header>
 
       <div className="card card-pad" style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-        <span style={{ fontSize: 18 }}>🔁</span>
+        <AppIcon name="calendar-clock" size={18} color="var(--accent)" />
         <div className="small" style={{ color: 'var(--text-2)', lineHeight: 1.5 }}>
           房租、订阅、还款这类固定账目可以设成周期账单，
           <b style={{ color: 'var(--text)' }}>打开 App 时会自动补记</b>到期的条目。
@@ -53,7 +54,9 @@ export default function RecurringPage({ back }: { back: () => void }) {
 
         {recurring.length === 0 ? (
           <div className="card empty">
-            <span className="em">🔁</span>
+            <span className="em">
+              <AppIcon name="calendar-clock" size={30} />
+            </span>
             <div className="t">还没有周期账单</div>
             <div className="s">点击右上角 + 添加</div>
           </div>
@@ -81,7 +84,11 @@ export default function RecurringPage({ back }: { back: () => void }) {
                         className="cat-icon"
                         style={{ background: (cat?.color ?? '#999') + '1f' }}
                       >
-                        {cat?.icon ?? '🔁'}
+                        <AppIcon
+                          name={cat?.icon ?? 'package'}
+                          size={18}
+                          color={cat?.color ?? 'var(--text-2)'}
+                        />
                       </span>
                       <span style={{ minWidth: 0 }}>
                         <div style={{ fontSize: 14, fontWeight: 500 }}>{r.name}</div>
@@ -224,7 +231,7 @@ function RuleEditor({
         <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
           {cats.map((c) => (
             <option key={c.id} value={c.id}>
-              {c.icon} {c.name}
+              {c.name}
             </option>
           ))}
         </select>
@@ -234,7 +241,7 @@ function RuleEditor({
         <select value={accountId} onChange={(e) => setAccountId(e.target.value)}>
           {accounts.map((a) => (
             <option key={a.id} value={a.id}>
-              {a.icon} {a.name}
+              {a.name}
             </option>
           ))}
         </select>

@@ -8,6 +8,7 @@ import Heatmap from '../components/Heatmap'
 import MonthCalendar from '../components/MonthCalendar'
 import TransactionRow from '../components/TransactionRow'
 import { IconChevronLeft, IconChevronRight } from '../components/Icons'
+import { AppIcon } from '../lib/appIcons'
 
 type View = 'expense' | 'income'
 
@@ -46,7 +47,7 @@ export default function StatsPage({ navigate }: { navigate: (to: string) => void
         value: v,
         label: catMap.get(id)?.name ?? '未分类',
         color: catMap.get(id)?.color ?? '#9A938C',
-        icon: catMap.get(id)?.icon ?? '📦',
+        icon: catMap.get(id)?.icon ?? 'package',
       }))
       .sort((a, b) => b.value - a.value)
     return arr
@@ -265,7 +266,9 @@ export default function StatsPage({ navigate }: { navigate: (to: string) => void
 
         {byCat.length === 0 ? (
           <div className="card empty">
-            <span className="em">📊</span>
+            <span className="em">
+              <AppIcon name="trending-up" size={30} />
+            </span>
             <div className="t">本月还没有{view === 'expense' ? '支出' : '收入'}记录</div>
           </div>
         ) : (
@@ -285,7 +288,7 @@ export default function StatsPage({ navigate }: { navigate: (to: string) => void
                   onClick={() => navigate(`/list`)}
                 >
                   <span className="nm">
-                    <span>{c.icon}</span>
+                    <AppIcon name={c.icon} size={15} color={c.color} />
                     {c.label}
                   </span>
                   <span className="bar-track">

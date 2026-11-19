@@ -4,6 +4,7 @@ import { useApp } from '../lib/store'
 import { useDragReorder } from '../lib/dragReorder'
 import { IconChevronLeft, IconPlus } from '../components/Icons'
 import CategoryEditor from '../components/CategoryEditor'
+import { AppIcon } from '../lib/appIcons'
 import type { Category } from '../db/types'
 
 /** 拖动柄：两列小圆点，只在这里按下才能排序，避免整行拖动时和页面滚动打架 */
@@ -95,7 +96,7 @@ export default function CategoriesPage({ back }: { back: () => void }) {
             }}
           >
             <span className="cat-icon" style={{ background: c.color + '1f' }}>
-              {c.icon}
+              <AppIcon name={c.icon} size={18} color={c.color} />
             </span>
             <span className="lbl">{c.name}</span>
             <button

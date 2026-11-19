@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import dayjs from 'dayjs'
+import { db } from '../db'
 import { useApp } from '../lib/store'
 import { formatDateLabel, formatMonth, money, weekdayLabel } from '../lib/format'
 import TransactionRow from '../components/TransactionRow'
@@ -10,6 +11,7 @@ import {
   IconClose,
   IconSearch,
 } from '../components/Icons'
+import { AppIcon } from '../lib/appIcons'
 import type { Transaction, TxType } from '../db/types'
 
 type Filter = 'all' | TxType
@@ -19,7 +21,7 @@ export default function TransactionsPage({
 }: {
   navigate: (to: string) => void
 }) {
-  const { transactions, categories, accounts, catMap } = useApp()
+  const { transactions, categories, accounts, catMap, toast } = useApp()
   const [month, setMonth] = useState(dayjs().format('YYYY-MM'))
   const [filter, setFilter] = useState<Filter>('all')
   const [q, setQ] = useState('')
@@ -29,6 +31,7 @@ export default function TransactionsPage({
   const [accFilter, setAccFilter] = useState<string | null>(null)
   const [minAmt, setMinAmt] = useState('')
   const [maxAmt, setMaxAmt] = useState('')
+  const [deleting, setDeleting] = useState<Transaction | null>(null)
 
   const isCurrent = month === dayjs().format('YYYY-MM')
 
@@ -150,7 +153,12 @@ export default function TransactionsPage({
         <div className="row small" style={{ padding: '0 2px 8px', gap: 8, flexWrap: 'wrap' }}>
           {catFilter && (
             <button className="chip" onClick={() => setCatFilter(null)}>
-              {catMap.get(catFilter)?.icon} {catMap.get(catFilter)?.name}
+              <AppIcon
+                name={catMap.get(catFilter)?.icon ?? 'package'}
+                size={13}
+                color={catMap.get(catFilter)?.color}
+              />
+              {catMap.get(catFilter)?.name}
               <IconClose size={11} />
             </button>
           )}
@@ -190,7 +198,9 @@ export default function TransactionsPage({
 
       {groups.length === 0 ? (
         <div className="card empty">
-          <span className="em">🔍</span>
+          <span className="em">
+            <AppIcon name="search" size={30} />
+          </span>
           <div className="t">没有符合条件的记录</div>
           <div className="s">试试换个月份或清除筛选</div>
         </div>
@@ -214,6 +224,7 @@ export default function TransactionsPage({
                   key={t.id}
                   tx={t}
                   onClick={() => navigate(`/add?id=${t.id}`)}
+                  onDelete={() => setDeleting(t)}
                 />
               ))}
             </div>
@@ -239,7 +250,8 @@ export default function TransactionsPage({
                 className={'pill' + (catFilter === c.id ? ' active' : '')}
                 onClick={() => setCatFilter(catFilter === c.id ? null : c.id)}
               >
-                {c.icon} {c.name}
+                <AppIcon name={c.icon} size={14} color={c.color} />
+                {c.name}
               </button>
             ))}
           </div>
@@ -288,7 +300,8 @@ export default function TransactionsPage({
                 className={'pill' + (accFilter === a.id ? ' active' : '')}
                 onClick={() => setAccFilter(accFilter === a.id ? null : a.id)}
               >
-                {a.icon} {a.name}
+                <AppIcon name={a.icon} size={14} color={a.color} />
+                {a.name}
               </button>
             ))}
           </div>
@@ -301,6 +314,29 @@ export default function TransactionsPage({
           </button>
         </Sheet>
       )}
+      {deleting && (
+        <Sheet title="删除这笔记录？" onClose={() => setDeleting(null)}>
+          <p style={{ color: 'var(--text-2)', fontSize: 14, padding: '0 4px 14px' }}>
+            删除后无法恢复；账本的历史留档里可能还有旧版本。
+          </p>
+          <div className="row" style={{ gap: 10 }}>
+            <button className="btn btn-ghost btn-block" onClick={() => setDeleting(null)}>
+              取消
+            </button>
+            <button
+              className="btn btn-danger btn-block"
+              onClick={async () => {
+                await db.transactions.delete(deleting.id)
+                toast('已删除')
+                setDeleting(null)
+              }}
+            >
+              删除
+            </button>
+          </div>
+        </Sheet>
+      )}
+
       {searching && <div style={{ display: 'none' }} onClick={() => setSearching(false)} />}
     </div>
   )

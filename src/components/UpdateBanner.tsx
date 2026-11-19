@@ -1,5 +1,6 @@
 import { useApp } from '../lib/store'
 import { IconClose } from './Icons'
+import { AppIcon } from '../lib/appIcons'
 
 /**
  * 首页顶部一行更新提示。
@@ -14,7 +15,7 @@ export default function UpdateBanner() {
   return (
     <div className="update-banner">
       <span className="em" aria-hidden>
-        🎉
+        <AppIcon name="party-popper" size={20} />
       </span>
       <div className="txt">
         <b>新版本 v{info.latest} 可以装了</b>

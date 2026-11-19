@@ -31,6 +31,7 @@ import {
   IconMic,
   IconTrash,
 } from '../components/Icons'
+import { AppIcon } from '../lib/appIcons'
 
 /** 一条消息里的一张待确认卡片 */
 interface Draft extends ParsedDraft {
@@ -508,7 +509,11 @@ export default function ChatPage({
       <div className="chat-log">
         {msgs.map((m) => (
           <div key={m.id} className={'chat-msg ' + m.role}>
-            {m.role === 'bot' && <span className="chat-avatar">🧾</span>}
+            {m.role === 'bot' && (
+              <span className="chat-avatar">
+                <AppIcon name="receipt" size={15} />
+              </span>
+            )}
             <div className="chat-col">
               <div className="bubble">{m.text}</div>
 
@@ -527,7 +532,11 @@ export default function ChatPage({
                           color: cat?.color ?? '#9C86C9',
                         }}
                       >
-                        {isTransfer ? '🔄' : (cat?.icon ?? '📦')}
+                        <AppIcon
+                          name={isTransfer ? 'arrow-left-right' : (cat?.icon ?? 'package')}
+                          size={18}
+                          color={cat?.color ?? '#9C86C9'}
+                        />
                       </span>
                       {isTransfer ? (
                         <span className="draft-title">
@@ -558,7 +567,9 @@ export default function ChatPage({
 
                     <div className="draft-fields">
                       <button className="chip" onClick={() => openField(m.id, d, 'account')}>
-                        <span className="em">{acc?.icon ?? '💳'}</span>
+                        <span className="em">
+                          <AppIcon name={acc?.icon ?? 'credit-card'} size={14} color={acc?.color} />
+                        </span>
                         {acc?.name ?? '选账户'}
                       </button>
                       {isTransfer && (
@@ -584,7 +595,11 @@ export default function ChatPage({
                         }
                       />
                     )}
-                    {d.done && d.note && <div className="draft-note-ro">📝 {d.note}</div>}
+                    {d.done && d.note && (
+                      <div className="draft-note-ro">
+                        <AppIcon name="notebook-pen" size={12} /> {d.note}
+                      </div>
+                    )}
 
                     {!d.done && (
                       <div className="draft-actions">
@@ -643,7 +658,9 @@ export default function ChatPage({
         ))}
         {thinking && (
           <div className="chat-msg bot">
-            <span className="chat-avatar">🧾</span>
+            <span className="chat-avatar">
+              <AppIcon name="receipt" size={15} />
+            </span>
             <div className="chat-col">
               <div className="bubble typing">
                 <span />
@@ -733,7 +750,7 @@ export default function ChatPage({
                   }
                 >
                   <span className="cat-icon" style={{ background: a.color + '1f' }}>
-                    {a.icon}
+                    <AppIcon name={a.icon} size={17} color={a.color} />
                   </span>
                   <span style={{ flex: 1, textAlign: 'left' }} className="nm">
                     {a.name}
@@ -763,7 +780,7 @@ export default function ChatPage({
                     }
                   >
                     <span className="cat-icon" style={{ background: a.color + '1f' }}>
-                      {a.icon}
+                      <AppIcon name={a.icon} size={17} color={a.color} />
                     </span>
                     <span style={{ flex: 1, textAlign: 'left' }} className="nm">
                       {a.name}
@@ -800,7 +817,11 @@ export default function ChatPage({
                       className="box"
                       style={c.id === editingDraft.categoryId ? { background: c.color } : undefined}
                     >
-                      {c.icon}
+                      <AppIcon
+                        name={c.icon}
+                        size={18}
+                        color={c.id === editingDraft.categoryId ? '#fff' : c.color}
+                      />
                     </span>
                     <span className="nm">{c.name}</span>
                   </button>

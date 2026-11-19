@@ -10,6 +10,7 @@ import {
   IconClose,
   IconPlus,
 } from '../components/Icons'
+import { AppIcon } from '../lib/appIcons'
 
 export default function BudgetPage({ back }: { back: () => void }) {
   const { budgets, transactions, categories, catMap, toast } = useApp()
@@ -168,7 +169,9 @@ export default function BudgetPage({ back }: { back: () => void }) {
 
         {catBudgets.length === 0 ? (
           <div className="card empty">
-            <span className="em">🎯</span>
+            <span className="em">
+              <AppIcon name="target" size={30} />
+            </span>
             <div className="t">还没有分类预算</div>
             <div className="s">给最容易超支的分类设个上限</div>
           </div>
@@ -191,7 +194,7 @@ export default function BudgetPage({ back }: { back: () => void }) {
                 >
                   <div className="row" style={{ justifyContent: 'space-between' }}>
                     <span className="row" style={{ gap: 7, fontSize: 14 }}>
-                      <span>{b.cat?.icon ?? '📦'}</span>
+                      <AppIcon name={b.cat?.icon ?? 'package'} size={16} color={b.cat?.color} />
                       {b.cat?.name ?? '已删除分类'}
                     </span>
                     <span className="row" style={{ gap: 6 }}>
@@ -287,7 +290,9 @@ export default function BudgetPage({ back }: { back: () => void }) {
                   openEdit(c.id)
                 }}
               >
-                <span className="box" style={{ background: c.color + '1a' }}>{c.icon}</span>
+                <span className="box" style={{ background: c.color + '1a' }}>
+                  <AppIcon name={c.icon} size={19} color={c.color} />
+                </span>
                 <span className="nm">{c.name}</span>
               </button>
             ))}

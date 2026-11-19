@@ -9,17 +9,29 @@ import {
   IconTrash,
   IconTransfer,
 } from '../components/Icons'
+import { AppIcon } from '../lib/appIcons'
 import type { Account, AccountKind } from '../db/types'
 
-const KINDS: { k: AccountKind; label: string; icon: string }[] = [
-  { k: 'cash', label: '现金', icon: '💵' },
-  { k: 'ewallet', label: '电子钱包', icon: '📱' },
-  { k: 'bank', label: '银行卡', icon: '🏦' },
-  { k: 'credit', label: '信用卡', icon: '💳' },
-  { k: 'other', label: '其他', icon: '🪙' },
+const KINDS: { k: AccountKind; label: string }[] = [
+  { k: 'cash', label: '现金' },
+  { k: 'ewallet', label: '电子钱包' },
+  { k: 'bank', label: '银行卡' },
+  { k: 'credit', label: '信用卡' },
+  { k: 'other', label: '其他' },
 ]
 
-const PRESET_ICONS = ['💬', '🅰️', '🏦', '💳', '💵', '🪙', '📈', '🐷', '🏠', '✈️']
+const PRESET_ICONS = [
+  'message-circle',
+  'wallet',
+  'landmark',
+  'credit-card',
+  'banknote',
+  'coins',
+  'trending-up',
+  'piggy-bank',
+  'house',
+  'plane',
+]
 
 export default function AccountsPage({ back }: { back: () => void }) {
   const { accounts, accountBalances, transactions, toast } = useApp()
@@ -111,9 +123,9 @@ export default function AccountsPage({ back }: { back: () => void }) {
               <div key={a.id} className="acc-row" onClick={() => setEditing(a)} style={{ cursor: 'pointer' }}>
                 <span
                   className="cat-icon"
-                  style={{ background: a.color + '1f', width: 38, height: 38, borderRadius: 12, fontSize: 18 }}
+                  style={{ background: a.color + '1f', width: 38, height: 38, borderRadius: 12 }}
                 >
-                  {a.icon}
+                  <AppIcon name={a.icon} size={19} color={a.color} />
                 </span>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div className="nm">{a.name}</div>
@@ -175,7 +187,7 @@ function AccountEditor({
   const { toast } = useApp()
   const [name, setName] = useState(account?.name ?? '')
   const [kind, setKind] = useState<AccountKind>(account?.kind ?? 'ewallet')
-  const [icon, setIcon] = useState(account?.icon ?? '💳')
+  const [icon, setIcon] = useState(account?.icon ?? 'credit-card')
   const [balance, setBalance] = useState(
     account ? String(account.initialBalance / 100) : '',
   )
@@ -225,7 +237,7 @@ function AccountEditor({
         <select value={kind} onChange={(e) => setKind(e.target.value as AccountKind)}>
           {KINDS.map((k) => (
             <option key={k.k} value={k.k}>
-              {k.icon} {k.label}
+              {k.label}
             </option>
           ))}
         </select>
@@ -263,12 +275,11 @@ function AccountEditor({
                 width: 34,
                 height: 34,
                 borderRadius: 10,
-                fontSize: 17,
                 background: icon === ic ? 'var(--accent-soft)' : 'var(--surface-3)',
                 border: icon === ic ? '1px solid var(--accent)' : '1px solid transparent',
               }}
             >
-              {ic}
+              <AppIcon name={ic} size={18} color={icon === ic ? 'var(--accent)' : 'var(--text-2)'} />
             </button>
           ))}
         </div>
