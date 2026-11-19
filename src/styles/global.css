@@ -1620,6 +1620,24 @@ textarea {
   flex: 1;
 }
 
+/* ---------- 统计页编辑抽屉 ---------- */
+/* 弹层里的一行：拖动手柄 + 名称 + 开关 */
+.sheet .list-row {
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: background 0.16s;
+}
+
+.sheet .list-row.dragging {
+  opacity: 1;
+  background: var(--accent-soft);
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(60, 40, 24, 0.14);
+  transform: scale(1.012);
+  z-index: 2;
+}
+
 .list-row .val {
   font-size: 14px;
   color: var(--text-2);

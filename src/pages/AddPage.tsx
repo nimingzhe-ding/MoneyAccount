@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import dayjs from 'dayjs'
-import { db } from '../db'
+import { db, getSetting, setSetting } from '../db'
 import { useApp } from '../lib/store'
 import { useDragReorder } from '../lib/dragReorder'
 import { formatDateLabel, money, moneySigned, nowTime, parseAmount, todayStr, uid } from '../lib/format'
@@ -52,6 +52,7 @@ export default function AddPage({
   const originalRef = useRef<Transaction | null>(null)
   const holdRef = useRef<number>(0)
   const holdFiredRef = useRef(0)
+  const defaultAccountLoaded = useRef(false)
 
   const expenseCats = useMemo(
     () => categories.filter((c) => c.type === 'expense' && !c.archived),
@@ -65,8 +66,22 @@ export default function AddPage({
   // 首次进入：设置默认账户 / 分类
   useEffect(() => {
     if (!accounts.length) return
-    if (!accountId) setAccountId(accounts[0].id)
-    if (!toAccountId && accounts.length > 1) setToAccountId(accounts[1].id)
+    if (!accountId && !editId && !defaultAccountLoaded.current) {
+      defaultAccountLoaded.current = true
+      let cancelled = false
+      getSetting<string>('lastAccountId', '').then((id) => {
+        if (cancelled) return
+        const pick = accounts.find((a) => a.id === id && !a.archived) ?? accounts[0]
+        if (pick) setAccountId(pick.id)
+      })
+      return () => {
+        cancelled = true
+      }
+    }
+    if (!toAccountId && accounts.length > 1) {
+      const other = accounts.find((a) => a.id !== accountId && !a.archived)
+      if (other) setToAccountId(other.id)
+    }
   }, [accounts, accountId, toAccountId])
 
   useEffect(() => {
@@ -159,6 +174,8 @@ export default function AddPage({
       recurringId: orig?.recurringId,
     }
     await db.transactions.put(payload)
+    // 记住这次用的账户，下次新建默认选它
+    await setSetting('lastAccountId', accountId)
     toast(orig ? '已更新' : `已记账 ¥${money(amount)}`)
     back()
   }

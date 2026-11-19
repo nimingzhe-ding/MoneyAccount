@@ -1,15 +1,44 @@
-import { useMemo, useState } from 'react'
+import { Fragment, useEffect, useMemo, useState, type ReactNode } from 'react'
 import dayjs from 'dayjs'
+import { getSetting, setSetting } from '../db'
 import { useApp } from '../lib/store'
 import { formatMonth, money, moneySigned, percent, weekdayLabel } from '../lib/format'
+import { useDragReorder } from '../lib/dragReorder'
 import Donut from '../components/Donut'
 import TrendChart from '../components/TrendChart'
 import Heatmap from '../components/Heatmap'
 import MonthCalendar from '../components/MonthCalendar'
 import TransactionRow from '../components/TransactionRow'
-import { IconChevronLeft, IconChevronRight } from '../components/Icons'
+import Sheet from '../components/Sheet'
+import { IconChevronLeft, IconChevronRight, IconEdit } from '../components/Icons'
 
 type View = 'expense' | 'income'
+
+/** 统计页可开关 / 拖动排序的模块；这里是默认顺序 */
+const STATS_MODULES = [
+  { id: 'summary', label: '本月结余' },
+  { id: 'trend', label: '收支趋势' },
+  { id: 'calendar', label: '记账日历' },
+  { id: 'heatmap', label: '记账打卡' },
+  { id: 'daily', label: '每日支出' },
+  { id: 'donut', label: '收支构成' },
+] as const
+
+type ModuleMeta = (typeof STATS_MODULES)[number]
+const ALL_IDS = STATS_MODULES.map((m) => m.id)
+
+function GripIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden>
+      <circle cx="6" cy="3" r="1.3" />
+      <circle cx="10" cy="3" r="1.3" />
+      <circle cx="6" cy="8" r="1.3" />
+      <circle cx="10" cy="8" r="1.3" />
+      <circle cx="6" cy="13" r="1.3" />
+      <circle cx="10" cy="13" r="1.3" />
+    </svg>
+  )
+}
 
 export default function StatsPage({ navigate }: { navigate: (to: string) => void }) {
   const { transactions, catMap } = useApp()
@@ -17,6 +46,33 @@ export default function StatsPage({ navigate }: { navigate: (to: string) => void
   const [view, setView] = useState<View>('expense')
   const [trendMode, setTrendMode] = useState<'6m' | '30d'>('6m')
   const [picked, setPicked] = useState<string | null>(null)
+
+  const [order, setOrder] = useState<string[]>([...ALL_IDS])
+  const [hidden, setHidden] = useState<string[]>([])
+  const [editing, setEditing] = useState(false)
+
+  // 设置只存在本机；order 是全部模块的顺序（隐藏的也留在里面），hidden 是被关掉的模块
+  useEffect(() => {
+    Promise.all([
+      getSetting<string[]>('stats.order', []),
+      getSetting<string[]>('stats.hidden', []),
+    ]).then(([savedOrder, savedHidden]) => {
+      const known = new Set<string>(ALL_IDS)
+      const saved = savedOrder.filter((id) => known.has(id))
+      const hiddenNext = savedHidden.filter((id) => known.has(id))
+      // 新版本新增的模块没有被保存过，默认追加到末尾
+      setOrder([...saved, ...ALL_IDS.filter((id) => !saved.includes(id))])
+      setHidden(hiddenNext)
+    })
+  }, [])
+
+  const { order: dragOrder, dragId, onPointerDown, wasDragging } = useDragReorder({
+    ids: order,
+    onCommit: (next) => {
+      setOrder(next)
+      void setSetting('stats.order', next)
+    },
+  })
 
   const isCurrent = month === dayjs().format('YYYY-MM')
 
@@ -123,24 +179,33 @@ export default function StatsPage({ navigate }: { navigate: (to: string) => void
       .sort((a, b) => b.createdAt - a.createdAt)
   }, [monthTx, picked])
 
-  return (
-    <div className="page">
-      <header className="topbar">
-        <div>
-          <h1>统计</h1>
-          <div className="sub">{formatMonth(month)} 概览</div>
-        </div>
-        <div className="month-switch">
-          <button onClick={() => shiftMonth(-1)}>
-            <IconChevronLeft size={17} />
-          </button>
-          <span className="m">{formatMonth(month)}</span>
-          <button onClick={() => shiftMonth(1)} disabled={isCurrent} style={{ opacity: isCurrent ? 0.25 : 1 }}>
-            <IconChevronRight size={17} />
-          </button>
-        </div>
-      </header>
+  // ---------------------------------------------------------------- 编辑布局
 
+  const isHidden = (id: string) => hidden.includes(id)
+
+  const toggleModule = (id: string) => {
+    setHidden((prev) => {
+      const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+      void setSetting('stats.hidden', next)
+      return next
+    })
+  }
+
+  const resetModules = () => {
+    setOrder([...ALL_IDS])
+    setHidden([])
+    void setSetting('stats.order', [...ALL_IDS])
+    void setSetting('stats.hidden', [])
+  }
+
+  const visibleModules = dragOrder
+    .filter((id) => !isHidden(id))
+    .map((id) => STATS_MODULES.find((m) => m.id === id))
+    .filter((m): m is ModuleMeta => !!m)
+
+  // 每个模块的内容；顺序由上面的 dragOrder 决定
+  const modules: Record<string, ReactNode> = {
+    summary: (
       <div className="card stat-hero">
         <div className="row" style={{ justifyContent: 'space-between' }}>
           <span className="m">本月结余</span>
@@ -160,7 +225,8 @@ export default function StatsPage({ navigate }: { navigate: (to: string) => void
           </span>
         </div>
       </div>
-
+    ),
+    trend: (
       <section className="section">
         <div className="section-head">
           <h2>收支趋势</h2>
@@ -177,7 +243,8 @@ export default function StatsPage({ navigate }: { navigate: (to: string) => void
           <TrendChart data={trend} height={142} />
         </div>
       </section>
-
+    ),
+    calendar: (
       <section className="section">
         <div className="section-head">
           <h2>记账日历</h2>
@@ -206,7 +273,8 @@ export default function StatsPage({ navigate }: { navigate: (to: string) => void
           </div>
         )}
       </section>
-
+    ),
+    heatmap: (
       <section className="section">
         <div className="section-head">
           <h2>记账打卡</h2>
@@ -216,7 +284,8 @@ export default function StatsPage({ navigate }: { navigate: (to: string) => void
           <Heatmap transactions={transactions} />
         </div>
       </section>
-
+    ),
+    daily: (
       <section className="section">
         <div className="section-head">
           <h2>每日支出</h2>
@@ -249,7 +318,8 @@ export default function StatsPage({ navigate }: { navigate: (to: string) => void
           </div>
         </div>
       </section>
-
+    ),
+    donut: (
       <section className="section">
         <div className="section-head">
           <h2>{view === 'expense' ? '支出' : '收入'}构成</h2>
@@ -306,6 +376,80 @@ export default function StatsPage({ navigate }: { navigate: (to: string) => void
           </div>
         )}
       </section>
+    ),
+  }
+
+  return (
+    <div className="page stats-page">
+      <header className="topbar">
+        <div>
+          <h1>统计</h1>
+          <div className="sub">{formatMonth(month)} 概览</div>
+        </div>
+        <div className="row" style={{ gap: 4, alignItems: 'center' }}>
+          <button className="icon-btn" onClick={() => setEditing(true)} aria-label="编辑统计页">
+            <IconEdit size={17} />
+          </button>
+          <div className="month-switch">
+            <button onClick={() => shiftMonth(-1)}>
+              <IconChevronLeft size={17} />
+            </button>
+            <span className="m">{formatMonth(month)}</span>
+            <button onClick={() => shiftMonth(1)} disabled={isCurrent} style={{ opacity: isCurrent ? 0.25 : 1 }}>
+              <IconChevronRight size={17} />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {visibleModules.map((m) => (
+        <Fragment key={m.id}>{modules[m.id]}</Fragment>
+      ))}
+
+      {visibleModules.length === 0 && (
+        <div className="card empty" style={{ marginTop: 14 }}>
+          <div className="t">统计页的组件都被隐藏了</div>
+          <div className="s">点右上角的编辑图标重新打开</div>
+        </div>
+      )}
+
+      {editing && (
+        <Sheet title="编辑统计页" onClose={() => setEditing(false)}>
+          <div className="card" style={{ overflow: 'hidden' }}>
+            {dragOrder.map((id, i) => {
+              const m = STATS_MODULES.find((x) => x.id === id)
+              if (!m) return null
+              const on = !isHidden(id)
+              return (
+                <button
+                  key={id}
+                  className={'list-row' + (dragId === id ? ' dragging' : '')}
+                  data-drag-id={id}
+                  style={{ borderTop: i === 0 ? 'none' : undefined }}
+                  onClick={() => {
+                    if (!wasDragging()) toggleModule(id)
+                  }}
+                >
+                  <span
+                    className="drag-handle"
+                    onPointerDown={(e) => onPointerDown(id, e)}
+                    aria-hidden
+                  >
+                    <GripIcon />
+                  </span>
+                  <span className="lbl" style={{ opacity: on ? 1 : 0.45 }}>
+                    {m.label}
+                  </span>
+                  <span className={'switch' + (on ? ' on' : '')} aria-hidden />
+                </button>
+              )
+            })}
+          </div>
+          <button className="btn btn-ghost btn-block" style={{ marginTop: 12 }} onClick={resetModules}>
+            恢复默认
+          </button>
+        </Sheet>
+      )}
 
       <div style={{ height: 8 }} />
     </div>
