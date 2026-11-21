@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { money } from '../lib/format'
 
 export interface TrendPoint {
   label: string
@@ -38,6 +39,10 @@ export default function TrendChart({
   }
 
   const cur = active !== null ? data[active] : null
+
+  // 浮层贴着边缘时不越过图表：左侧靠边左对齐，右侧靠边右对齐
+  const tipPct = active !== null ? (xAt(active) / w) * 100 : 0
+  const tipShift = tipPct <= 25 ? '0%' : tipPct >= 75 ? '-100%' : '-50%'
 
   return (
     <div style={{ position: 'relative' }}>
@@ -119,8 +124,9 @@ export default function TrendChart({
           style={{
             position: 'absolute',
             top: 0,
-            left: `${((xAt(active!) / w) * 100).toFixed(1)}%`,
-            transform: 'translateX(-50%)',
+            left: `${tipPct.toFixed(1)}%`,
+            transform: `translateX(${tipShift})`,
+            maxWidth: 'calc(100% - 8px)',
             background: 'var(--text)',
             color: 'var(--bg)',
             padding: '5px 9px',
@@ -131,7 +137,7 @@ export default function TrendChart({
             zIndex: 2,
           }}
         >
-          {cur.label} · 支出 ¥{(cur.expense / 100).toFixed(0)} · 收入 ¥{(cur.income / 100).toFixed(0)}
+          {cur.label} · 支出 ¥{money(cur.expense)} · 收入 ¥{money(cur.income)}
         </div>
       )}
     </div>

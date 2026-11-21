@@ -15,7 +15,7 @@ export default function StatsPage({ navigate }: { navigate: (to: string) => void
   const { transactions, catMap } = useApp()
   const [month, setMonth] = useState(dayjs().format('YYYY-MM'))
   const [view, setView] = useState<View>('expense')
-  const [trendMode, setTrendMode] = useState<'6m' | '30d'>('6m')
+  const [trendMode, setTrendMode] = useState<'6m' | 'daily'>('6m')
   const [picked, setPicked] = useState<string | null>(null)
 
   const isCurrent = month === dayjs().format('YYYY-MM')
@@ -71,22 +71,17 @@ export default function StatsPage({ navigate }: { navigate: (to: string) => void
       }
       return out
     }
-    const out: { label: string; expense: number; income: number }[] = []
+    // 本月：一天一个点；当月只画到今天，避免后面一长串 0 把线压平
     const dim = dayjs(month + '-01').daysInMonth()
-    const chunk = 3
-    for (let start = 1; start <= dim; start += chunk) {
-      const end = Math.min(dim, start + chunk - 1)
-      let exp = 0
-      let inc = 0
-      monthTx.forEach((t) => {
-        const d = Number(t.date.slice(8))
-        if (d >= start && d <= end) {
-          if (t.type === 'expense') exp += t.amount
-          if (t.type === 'income') inc += t.amount
-        }
-      })
-      out.push({ label: `${start}`, expense: exp, income: inc })
-    }
+    const days = month === dayjs().format('YYYY-MM') ? dayjs().date() : dim
+    const out: { label: string; expense: number; income: number }[] = []
+    for (let d = 1; d <= days; d++) out.push({ label: `${d}日`, expense: 0, income: 0 })
+    monthTx.forEach((t) => {
+      const bucket = out[Number(t.date.slice(8)) - 1]
+      if (!bucket) return
+      if (t.type === 'expense') bucket.expense += t.amount
+      if (t.type === 'income') bucket.income += t.amount
+    })
     return out
   }, [transactions, monthTx, month, trendMode])
 
@@ -168,7 +163,7 @@ export default function StatsPage({ navigate }: { navigate: (to: string) => void
             <button className={trendMode === '6m' ? 'active' : ''} onClick={() => setTrendMode('6m')}>
               近6月
             </button>
-            <button className={trendMode === '30d' ? 'active' : ''} onClick={() => setTrendMode('30d')}>
+            <button className={trendMode === 'daily' ? 'active' : ''} onClick={() => setTrendMode('daily')}>
               本月
             </button>
           </div>
